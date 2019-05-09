@@ -34,10 +34,28 @@ namespace Akarin.Network
         public string SecureServerName = null;
     }
 
+    internal class StaticInvokeBinder
+    {
+        private readonly Dictionary<string, uint> _idTable = new Dictionary<string, uint>();
+
+        internal StaticInvokeBinder(IEnumerable<Protocol> protocols)
+        {
+            uint current = 0;
+            foreach (var protocol in protocols) _idTable.Add(protocol.Name(), current++);
+        }
+
+        internal void Bind(AStaticInvoke invoke, IEndPoint endpoint)
+        {
+            invoke.Id = _idTable[invoke.Name];
+            invoke.Endpoint = endpoint;
+        }
+    }
+
     public sealed class Client : IDisposable
     {
         private readonly IEndPoint _endPoint;
         private readonly List<Protocol> _protocols;
+        private StaticInvokeBinder _binder;
 
         private Client(ClientCreateInfo create)
         {
@@ -67,6 +85,11 @@ namespace Akarin.Network
             return ret;
         }
 
+        public void BindStaticInvoke(AStaticInvoke invoke)
+        {
+            _binder.Bind(invoke, _endPoint);
+        }
+
         ~Client()
         {
             Close();
@@ -81,6 +104,7 @@ namespace Akarin.Network
             foreach (var entry in reply)
                 skvm[entry.Key].Id = entry.Value;
             _protocols.Sort((x, y) => Comparer<uint>.Default.Compare(x.Id, y.Id));
+            _binder = new StaticInvokeBinder(_protocols);
         }
 
         public Session.Send CreateMessage(uint protocol)

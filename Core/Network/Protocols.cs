@@ -27,6 +27,11 @@ namespace Akarin.Network
         Task<KeyValuePair<string, uint>[]> Execute(IEndPoint conn);
     }
 
+    public interface IHandshakeServerProtocol
+    {
+        void SetProtocolArray(List<Protocol> protocols);
+    }
+
     public class Handshake: ProtocolGroup<Handshake>, IHandshake
     {
         public async Task<KeyValuePair<string, uint>[]> Execute(IEndPoint conn)
@@ -40,24 +45,33 @@ namespace Akarin.Network
             return (await session.Value).Get<KeyValuePair<string, uint>[]>();
         }
 
-        public class Server : GroupProtocolFixedLength
+        protected class Server : GroupProtocolFixedLength, IHandshakeServerProtocol
         {
-            private readonly List<Protocol> _protocols;
+            private KeyValuePair<string, uint>[] _processed;
 
-            public Server(List<Protocol> protocols) : base(4)
+            public Server() : base(4)
             {
-                _protocols = protocols;
             }
 
             public override void HandleRequest(Session.Receive request)
             {
                 var session = request.ReadUInt32();
-                var current = 0;
-                var reply = new KeyValuePair<string, uint>[_protocols.Count];
-                foreach (var protocol in _protocols)
-                    reply[current++] = new KeyValuePair<string, uint>(protocol.Name(), protocol.Id);
-                Reply.Send(request.Session, session, reply);
+                Reply.Send(request.Session, session, _processed);
             }
+
+            public void SetProtocolArray(List<Protocol> protocols)
+            {
+                var current = 0;
+                var reply = new KeyValuePair<string, uint>[protocols.Count];
+                foreach (var protocol in protocols)
+                    reply[current++] = new KeyValuePair<string, uint>(protocol.Name(), protocol.Id);
+                _processed = reply;
+            }
+        }
+
+        public override Protocol GetServerSide()
+        {
+            return new Server();
         }
     }
 }

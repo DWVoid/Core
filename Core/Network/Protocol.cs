@@ -17,6 +17,8 @@
 //  limitations under the License.
 //  
 
+using System.Runtime.CompilerServices;
+
 namespace Akarin.Network
 {
     public abstract class Protocol

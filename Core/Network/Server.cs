@@ -18,7 +18,6 @@
 //  
 
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -46,17 +45,13 @@ namespace Akarin.Network
             _protocols = new List<Protocol> {new Reply(), create.HandshakeGroup.GetServerSide()}
                 .Concat(ProtocolGroupDiscoverer.GetServerSide(create.ProtocolGroups))
                 .ToList();
+            (_protocols[1] as IHandshakeServerProtocol)?.SetProtocolArray(_protocols);
         }
 
-        public async Task RunAsync()
+        public Task RunAsync()
         {
             Boot();
-            await ListenConnections();
-        }
-
-        public int CountConnections()
-        {
-            return ConnectionHost.CountConnections();
+            return ListenConnections();
         }
 
         private void Boot()

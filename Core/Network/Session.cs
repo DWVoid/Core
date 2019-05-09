@@ -52,7 +52,7 @@ namespace Akarin.Network
             return new Receive(this);
         }
 
-        internal Send CreateMessage(uint protocol)
+        public Send CreateMessage(uint protocol)
         {
             return new Send(this, protocol);
         }

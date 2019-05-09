@@ -4,6 +4,18 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Akarin</RootNamespace>
     <AssemblyName>Akarin.Core</AssemblyName>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageProjectUrl />
+    <RepositoryUrl>https://github.com/akarincli/Core/</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyVersion>1.0.1.1</AssemblyVersion>
+    <FileVersion>1.0.1.1</FileVersion>
+    <Description></Description>
+    <Copyright />
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -40,6 +40,18 @@ namespace Akarin.Network
         public abstract Protocol GetServerSide();
     }
 
+    public abstract class AStaticInvoke
+    {
+        internal IEndPoint Endpoint { private get; set; }
+        internal uint Id { private get; set; }
+        internal abstract string Name { get; }
+
+        protected Session.Send CreateMessage()
+        {
+            return Endpoint.CreateMessage(Id);
+        }
+    }
+
     public class ProtocolGroup<T> : AProtocolGroup
     {
         private static string ProtocolName;
@@ -100,6 +112,11 @@ namespace Akarin.Network
             ProtocolName = name;
         }
 
+        public class StaticInvoke : AStaticInvoke
+        {
+            internal override string Name => ProtocolName;
+        }
+
         public override Protocol GetClientSide() => new Stub();
         
         public override Protocol GetServerSide() => new Stub();
@@ -132,6 +149,7 @@ namespace Akarin.Network
                 {
                     groups.Add(info.ProtocolGroup, new List<AProtocolGroup>());
                 }
+
                 groups[info.ProtocolGroup].Add(group);
             }
         }
@@ -148,7 +166,8 @@ namespace Akarin.Network
 
         private static bool IsProtocolGroup(Type type)
         {
-            return typeof(AProtocolGroup).IsAssignableFrom(type) && type.IsDefined(typeof(DefineProtocolGroupAttribute), false);
+            return typeof(AProtocolGroup).IsAssignableFrom(type) &&
+                   type.IsDefined(typeof(DefineProtocolGroupAttribute), false);
         }
     }
 }
