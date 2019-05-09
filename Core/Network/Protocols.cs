@@ -32,6 +32,7 @@ namespace Akarin.Network
         void SetProtocolArray(List<Protocol> protocols);
     }
 
+    [DefineProtocolGroup(Name="Handshake.Default", ProtocolGroup = "Handshake")]
     public class Handshake: ProtocolGroup<Handshake>, IHandshake
     {
         public async Task<KeyValuePair<string, uint>[]> Execute(IEndPoint conn)

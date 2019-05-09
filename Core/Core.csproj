@@ -11,8 +11,8 @@
     <RepositoryUrl>https://github.com/akarincli/Core/</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <SignAssembly>false</SignAssembly>
-    <AssemblyVersion>1.0.1.1</AssemblyVersion>
-    <FileVersion>1.0.1.1</FileVersion>
+    <AssemblyVersion>1.0.1.2</AssemblyVersion>
+    <FileVersion>1.0.1.2</FileVersion>
     <Description></Description>
     <Copyright />
     <Version>1.0.1</Version>
