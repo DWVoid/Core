@@ -19,11 +19,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Akarin.Network
 {
-    public abstract class AProtocolGroup
+    public interface IProtocolGroup
+    {
+        Protocol GetClientSide();
+
+        Protocol GetServerSide();
+    }
+
+    public abstract class AProtocolGroup : IProtocolGroup
     {
         internal abstract void SetProtocolName(string name);
 
@@ -126,6 +134,16 @@ namespace Akarin.Network
                 }
                 groups[info.ProtocolGroup].Add(group);
             }
+        }
+
+        internal static List<Protocol> GetServerSide(params string[] names)
+        {
+            return (from name in names from @group in groups[name] select @group.GetServerSide()).ToList();
+        }
+
+        internal static List<Protocol> GetClientSide(params string[] names)
+        {
+            return (from name in names from @group in groups[name] select @group.GetClientSide()).ToList();
         }
 
         private static bool IsProtocolGroup(Type type)

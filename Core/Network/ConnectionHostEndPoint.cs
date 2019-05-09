@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,12 +62,19 @@ namespace Akarin.Network
                 Stream = _client.GetStream();
             }
 
-            internal void SetSslStream(string serverName)
+            internal void SetSslClientStream(string serverName)
             {
                 var stream = new SslStream(_client.GetStream(), false,
                     (sender, certificate, chain, sslPolicyErrors) => sslPolicyErrors == SslPolicyErrors.None, null);
                 stream.AuthenticateAsClient(serverName);
                 Stream = stream;
+            }
+            
+            internal void SetSslServerStream(X509Certificate cert)
+            {
+                var sslStream = new SslStream(_client.GetStream(), false);
+                sslStream.AuthenticateAsServer(cert, false, SslProtocols.Default, true);
+                Stream = sslStream;
             }
 
             internal void Close()

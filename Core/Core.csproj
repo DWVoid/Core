@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Akarin</RootNamespace>
+    <AssemblyName>Akarin.Core</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

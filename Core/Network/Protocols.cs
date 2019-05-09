@@ -22,10 +22,14 @@ using System.Threading.Tasks;
 
 namespace Akarin.Network
 {
-    [DefineProtocolGroup(Name = "Handshake", ProtocolGroup = "Ssl.Core")]
-    public class Handshake: ProtocolGroup<Handshake>
+    public interface IHandshake : IProtocolGroup
     {
-        internal static async Task<KeyValuePair<string, uint>[]> Get(IEndPoint conn)
+        Task<KeyValuePair<string, uint>[]> Execute(IEndPoint conn);
+    }
+
+    public class Handshake: ProtocolGroup<Handshake>, IHandshake
+    {
+        public async Task<KeyValuePair<string, uint>[]> Execute(IEndPoint conn)
         {
             var session = Reply.AllocSession();
             using (var message = conn.CreateMessage(1))
@@ -38,19 +42,19 @@ namespace Akarin.Network
 
         public class Server : GroupProtocolFixedLength
         {
-            private readonly List<Protocol> protocols;
+            private readonly List<Protocol> _protocols;
 
             public Server(List<Protocol> protocols) : base(4)
             {
-                this.protocols = protocols;
+                _protocols = protocols;
             }
 
             public override void HandleRequest(Session.Receive request)
             {
                 var session = request.ReadUInt32();
                 var current = 0;
-                var reply = new KeyValuePair<string, uint>[protocols.Count];
-                foreach (var protocol in protocols)
+                var reply = new KeyValuePair<string, uint>[_protocols.Count];
+                foreach (var protocol in _protocols)
                     reply[current++] = new KeyValuePair<string, uint>(protocol.Name(), protocol.Id);
                 Reply.Send(request.Session, session, reply);
             }

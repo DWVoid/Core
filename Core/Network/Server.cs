@@ -18,32 +18,40 @@
 //  
 
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Akarin.Network
 {
+    public class ServerCreateInfo
+    {
+        public int Port;
+        public IHandshake HandshakeGroup;
+        public string[] ProtocolGroups;
+        public X509Certificate ServerCert = null;
+    }
+   
     public class Server : TcpListener
     {
-        private readonly List<Protocol> protocols;
+        private readonly List<Protocol> _protocols;
+        private readonly X509Certificate _certificate;
 
-        public Server(int port) : base(IPAddress.Any, port)
+        public Server(ServerCreateInfo create) : base(IPAddress.Any, create.Port)
         {
-            protocols = new List<Protocol>();
-            RegisterProtocol(new Reply());
-            RegisterProtocol(new Handshake.Server(protocols));
+            _certificate = create.ServerCert;
+            _protocols = new List<Protocol> {new Reply(), create.HandshakeGroup.GetServerSide()}
+                .Concat(ProtocolGroupDiscoverer.GetServerSide(create.ProtocolGroups))
+                .ToList();
         }
 
         public async Task RunAsync()
         {
             Boot();
             await ListenConnections();
-        }
-
-        public void RegisterProtocol(Protocol newProtocol)
-        {
-            protocols.Add(newProtocol);
         }
 
         public int CountConnections()
@@ -60,23 +68,38 @@ namespace Akarin.Network
         private async Task ListenConnections()
         {
             while (Active)
+            {
                 try
                 {
                     var client = await AcceptTcpClientAsync();
-                    var connection = new  ConnectionHost.StreamConnection(client);
-                    connection.SetTcpStream();
-                    ConnectionHost.Add(connection, protocols);
+                    EnableClient(client);
                 }
                 catch
                 {
                     // ignored
                 }
+            }
+        }
+
+        private void EnableClient(TcpClient client)
+        {
+            var connection = new ConnectionHost.StreamConnection(client);
+            if (_certificate != null)
+            {
+                connection.SetSslServerStream(_certificate);
+            }
+            else
+            {
+                connection.SetTcpStream();
+            }
+
+            ConnectionHost.Add(connection, _protocols);
         }
 
         private void AssignProtocolIdentifiers()
         {
             var current = 0u;
-            foreach (var protocol in protocols)
+            foreach (var protocol in _protocols)
                 protocol.Id = current++;
         }
     }

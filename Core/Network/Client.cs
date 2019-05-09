@@ -19,52 +19,68 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Akarin.Network
 {
+    public class ClientCreateInfo
+    {
+        public string Address;
+        public IHandshake HandshakeGroup;
+        public int Port;
+        public string[] ProtocolGroups;
+        public string SecureServerName = null;
+    }
+
     public sealed class Client : IDisposable
     {
         private readonly IEndPoint _endPoint;
-        private readonly List<Protocol> protocols;
+        private readonly List<Protocol> _protocols;
 
-        public Client(string address, int port)
+        private Client(ClientCreateInfo create)
         {
-            var client = new TcpClient(address, port);
+            var client = new TcpClient(create.Address, create.Port);
             var connection = new ConnectionHost.StreamConnection(client);
-            connection.SetTcpStream();
-            protocols = new List<Protocol>();
-            RegisterProtocol(new Reply());
-            //RegisterProtocol(new Handshake.Client());
-            _endPoint = ConnectionHost.Add(connection, protocols);
+            if (create.SecureServerName == null)
+                connection.SetTcpStream();
+            else
+                connection.SetSslClientStream(create.SecureServerName);
+
+            _protocols = new List<Protocol> {new Reply(), create.HandshakeGroup.GetClientSide()}
+                .Concat(ProtocolGroupDiscoverer.GetClientSide(create.ProtocolGroups))
+                .ToList();
+            _endPoint = ConnectionHost.Add(connection, _protocols);
         }
 
         public void Dispose()
         {
-            ReleaseUnmanagedResources();
+            Close();
             GC.SuppressFinalize(this);
+        }
+
+        public static async Task<Client> CreateClient(ClientCreateInfo create)
+        {
+            var ret = new Client(create);
+            await ret.HandShake(create.HandshakeGroup);
+            return ret;
         }
 
         ~Client()
         {
-            ReleaseUnmanagedResources();
+            Close();
         }
 
-        public void RegisterProtocol(Protocol newProtocol)
-        {
-            protocols.Add(newProtocol);
-        }
-
-        public async Task HandShake()
+        private async Task HandShake(IHandshake handshake)
         {
             var skvm = new Dictionary<string, Protocol>();
-            foreach (var protocol in protocols)
+            foreach (var protocol in _protocols)
                 skvm.Add(protocol.Name(), protocol);
-            var reply = await Handshake.Get(_endPoint);
+            var reply = await handshake.Execute(_endPoint);
             foreach (var entry in reply)
                 skvm[entry.Key].Id = entry.Value;
-            protocols.Sort(ProtocolSorter);
+            _protocols.Sort((x, y) => Comparer<uint>.Default.Compare(x.Id, y.Id));
         }
 
         public Session.Send CreateMessage(uint protocol)
@@ -75,16 +91,6 @@ namespace Akarin.Network
         public void Close()
         {
             _endPoint.Close();
-        }
-
-        private static int ProtocolSorter(Protocol x, Protocol y)
-        {
-            return Comparer<uint>.Default.Compare(x.Id, y.Id);
-        }
-
-        private void ReleaseUnmanagedResources()
-        {
-            Close();
         }
     }
 }
