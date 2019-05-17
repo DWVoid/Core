@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,14 +11,17 @@
     <RepositoryUrl>https://github.com/akarincli/Core/</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <SignAssembly>false</SignAssembly>
-    <AssemblyVersion>1.0.1.2</AssemblyVersion>
-    <FileVersion>1.0.1.2</FileVersion>
+    <AssemblyVersion>1.0.1.1</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <Description></Description>
     <Copyright />
     <Version>1.0.1</Version>
+    <PackageVersion>1.0.2</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Config.Net" Version="4.13.7" />
+    <PackageReference Include="Config.Net.Json" Version="4.13.7" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
   </ItemGroup>
 
