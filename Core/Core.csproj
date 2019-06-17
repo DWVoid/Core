@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,12 +11,9 @@
     <RepositoryUrl>https://github.com/akarincli/Core/</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <SignAssembly>false</SignAssembly>
-    <AssemblyVersion>1.0.1.1</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
     <Description></Description>
     <Copyright />
-    <Version>1.0.1</Version>
-    <PackageVersion>1.0.2</PackageVersion>
+    <VersionPrefix>1.0.2</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
