@@ -19,7 +19,7 @@
   <ItemGroup>
     <PackageReference Include="Config.Net" Version="4.13.7" />
     <PackageReference Include="Config.Net.Json" Version="4.13.7" />
-    <PackageReference Include="MessagePack" Version="1.7.3.4" />
+    <PackageReference Include="MessagePack" Version="1.9.3" />
   </ItemGroup>
 
 </Project>
